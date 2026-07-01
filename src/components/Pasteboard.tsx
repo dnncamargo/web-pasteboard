@@ -14,6 +14,7 @@ export default function Pasteboard() {
   const [status, setStatus] = useState<"idle" | "saving" | "saved">("idle");
   const [lineCount, setLineCount] = useState(1);
   const [showLineNumbers, setShowLineNumbers] = useState(false);
+  const [focusToken, setFocusToken] = useState(0);
 
   const saveTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -31,6 +32,7 @@ export default function Pasteboard() {
     setActivePasteId(null);
     setContentHtml("");
     setStatus("idle");
+    setFocusToken((value) => value + 1);
   }
 
   function handleSelectPaste(paste: Paste) {
@@ -87,6 +89,8 @@ export default function Pasteboard() {
     }, SAVE_DELAY);
   }
 
+  
+
   return (
     <main className="pasteboard">
       <header className="pasteboard-header">
@@ -110,6 +114,7 @@ export default function Pasteboard() {
             onLineCountChange={setLineCount}
             showLineNumbers={showLineNumbers}
             onToggleLineNumbers={() => setShowLineNumbers((value) => !value)}
+            focusToken={focusToken}
           />
 
           <footer className="editor-footer">

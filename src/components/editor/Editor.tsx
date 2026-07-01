@@ -15,6 +15,7 @@ type EditorProps = {
   onChange: (html: string) => void;
   onLineCountChange: (count: number) => void;
   onToggleLineNumbers: () => void;
+  focusToken: number;
 };
 
 type LineMarker = {
@@ -22,13 +23,7 @@ type LineMarker = {
   top: number;
 };
 
-export default function Editor({
-  contentHtml,
-  showLineNumbers,
-  onChange,
-  onLineCountChange,
-  onToggleLineNumbers,
-}: EditorProps) {
+export default function Editor({ contentHtml, showLineNumbers, focusToken, onChange, onLineCountChange, onToggleLineNumbers }: EditorProps) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [lineMarkers, setLineMarkers] = useState<LineMarker[]>([]);
 
@@ -63,9 +58,7 @@ export default function Editor({
 
     const editorRect = editorElement.getBoundingClientRect();
 
-    const blocks = editorElement.querySelectorAll(
-      "p, h1, h2, h3, blockquote, li"
-    );
+    const blocks = editorElement.querySelectorAll("p, h1, h2, h3, blockquote, li");
 
     const markers: LineMarker[] = [];
 
@@ -100,6 +93,14 @@ export default function Editor({
   }, [contentHtml, editor]);
 
   useEffect(() => {
+    if (!editor) return;
+
+    requestAnimationFrame(() => {
+      editor.commands.focus("end");
+    });
+  }, [editor, focusToken]);
+
+  useEffect(() => {
     requestAnimationFrame(updateLineMarkers);
 
     window.addEventListener("resize", updateLineMarkers);
@@ -111,21 +112,14 @@ export default function Editor({
 
   return (
     <div className="editor-shell">
-      <Toolbar
-        editor={editor}
-        showLineNumbers={showLineNumbers}
-        onToggleLineNumbers={onToggleLineNumbers}
-      />
+      <Toolbar editor={editor} showLineNumbers={showLineNumbers} onToggleLineNumbers={onToggleLineNumbers} />
 
       <div className="editor-wrap" ref={wrapRef}>
         {showLineNumbers && (
           <div className="line-numbers" aria-hidden="true">
             <div className="line-numbers-inner">
               {lineMarkers.map((line) => (
-                <span
-                  key={line.number}
-                  style={{ top: `${line.top}px` }}
-                >
+                <span key={line.number} style={{ top: `${line.top}px` }}>
                   {line.number}
                 </span>
               ))}
