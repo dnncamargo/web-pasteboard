@@ -147,8 +147,9 @@ button {
 }
 
 .editor-area {
-  flex: 1;
+  caret-color: var(--text);
   min-height: calc(100vh - 150px);
+  cursor: text;
   outline: none;
   font-size: 19px;
   line-height: 1.45;
@@ -157,6 +158,10 @@ button {
 
 .editor-area p {
   margin: 0 0 0.35em;
+}
+
+.editor-area p:first-child {
+  min-height: 1.45em;
 }
 
 .editor-area h2 {
@@ -192,12 +197,23 @@ button {
   margin: 0;
 }
 
+.editor-area:focus {
+  outline: none;
+}
+
 .editor-wrap {
   flex: 1;
   min-height: 0;
   display: flex;
   overflow-y: auto;
   position: relative;
+}
+
+.editor-content-wrap {
+  min-width: 0;
+  width: 100%;
+  min-height: 100%;
+  padding-left: 46px;
 }
 
 .editor-footer {
@@ -213,13 +229,16 @@ button {
 }
 
 .line-numbers {
-  width: 42px;
-  flex: 0 0 42px;
-  position: relative;
-  padding-top: 6px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 34px;
+  height: 100%;
+  z-index: 1;
   color: var(--muted);
   font-size: 14px;
   user-select: none;
+  pointer-events: none;
 }
 
 .line-numbers-inner {
@@ -229,8 +248,10 @@ button {
 
 .line-numbers span {
   position: absolute;
-  right: 12px;
-  transform: translateY(0);
+  right: 8px;
+  padding-top: 6px;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .toolbar-active {
@@ -247,4 +268,18 @@ button {
 
 .delete-button:hover {
   color: var(--text);
+}
+
+.editor-column {
+  cursor: text;
+}
+
+.toolbar,
+.delete-button {
+  cursor: default;
+}
+
+.toolbar button,
+.delete-button {
+  cursor: pointer;
 }

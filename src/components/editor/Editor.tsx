@@ -23,8 +23,15 @@ type LineMarker = {
   top: number;
 };
 
-export default function Editor({ contentHtml, showLineNumbers, focusToken, onChange, onLineCountChange, onToggleLineNumbers }: EditorProps) {
-  const wrapRef = useRef<HTMLDivElement | null>(null);
+export default function Editor({
+  contentHtml,
+  showLineNumbers,
+  focusToken,
+  onChange,
+  onLineCountChange,
+  onToggleLineNumbers,
+}: EditorProps) {
+  const editorWrapRef = useRef<HTMLDivElement | null>(null);
   const [lineMarkers, setLineMarkers] = useState<LineMarker[]>([]);
 
   const editor = useEditor({
@@ -44,6 +51,13 @@ export default function Editor({ contentHtml, showLineNumbers, focusToken, onCha
         class: "editor-area",
       },
     },
+    onCreate({ editor }) {
+      window.setTimeout(() => {
+        editor.view.focus();
+        editor.commands.focus("end");
+        updateLineMarkers();
+      }, 0);
+    },
     onUpdate({ editor }) {
       onChange(editor.getHTML());
       requestAnimationFrame(updateLineMarkers);
@@ -51,14 +65,16 @@ export default function Editor({ contentHtml, showLineNumbers, focusToken, onCha
   });
 
   function updateLineMarkers() {
-    const wrap = wrapRef.current;
+    const wrap = editorWrapRef.current;
     const editorElement = wrap?.querySelector(".ProseMirror");
 
     if (!wrap || !editorElement) return;
 
     const editorRect = editorElement.getBoundingClientRect();
 
-    const blocks = editorElement.querySelectorAll("p, h1, h2, h3, blockquote, li");
+    const blocks = editorElement.querySelectorAll(
+      "p, h1, h2, h3, blockquote, li"
+    );
 
     const markers: LineMarker[] = [];
 
@@ -86,7 +102,9 @@ export default function Editor({ contentHtml, showLineNumbers, focusToken, onCha
     if (!editor) return;
 
     if (editor.getHTML() !== contentHtml) {
-      editor.commands.setContent(contentHtml || "");
+      editor.commands.setContent(contentHtml || "", {
+        emitUpdate: false,
+      });
     }
 
     requestAnimationFrame(updateLineMarkers);
@@ -95,26 +113,41 @@ export default function Editor({ contentHtml, showLineNumbers, focusToken, onCha
   useEffect(() => {
     if (!editor) return;
 
-    requestAnimationFrame(() => {
+    const timeout = window.setTimeout(() => {
+      editor.view.focus();
       editor.commands.focus("end");
-    });
+      updateLineMarkers();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
   }, [editor, focusToken]);
 
   useEffect(() => {
-    requestAnimationFrame(updateLineMarkers);
-
     window.addEventListener("resize", updateLineMarkers);
 
     return () => {
       window.removeEventListener("resize", updateLineMarkers);
     };
-  }, [editor, showLineNumbers]);
+  }, []);
 
   return (
     <div className="editor-shell">
-      <Toolbar editor={editor} showLineNumbers={showLineNumbers} onToggleLineNumbers={onToggleLineNumbers} />
+      <Toolbar
+        editor={editor}
+        showLineNumbers={showLineNumbers}
+        onToggleLineNumbers={onToggleLineNumbers}
+      />
 
-      <div className="editor-wrap" ref={wrapRef}>
+      <div
+        ref={editorWrapRef}
+        className={
+          showLineNumbers
+            ? "editor-wrap line-numbers-visible"
+            : "editor-wrap"
+        }
+      >
         {showLineNumbers && (
           <div className="line-numbers" aria-hidden="true">
             <div className="line-numbers-inner">
@@ -127,7 +160,9 @@ export default function Editor({ contentHtml, showLineNumbers, focusToken, onCha
           </div>
         )}
 
-        <EditorContent editor={editor} />
+        <div className="editor-content-wrap">
+          <EditorContent editor={editor} />
+        </div>
       </div>
     </div>
   );

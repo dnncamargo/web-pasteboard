@@ -28,22 +28,31 @@ export default function Pasteboard() {
     loadPastes();
   }, []);
 
+  function requestEditorFocus() {
+    setFocusToken((value) => value + 1);
+  }
+
   function handleNewPaste() {
     setActivePasteId(null);
     setContentHtml("");
     setStatus("idle");
-    setFocusToken((value) => value + 1);
+
+    requestAnimationFrame(() => {
+      setFocusToken((value) => value + 1);
+    });
   }
 
   function handleSelectPaste(paste: Paste) {
     setActivePasteId(paste.id);
     setContentHtml(paste.contentHtml);
     setStatus("idle");
+    requestEditorFocus();
   }
 
   async function handleDelete() {
     if (!activePasteId) {
       setContentHtml("");
+      requestEditorFocus();
       return;
     }
 
@@ -54,6 +63,7 @@ export default function Pasteboard() {
     setActivePasteId(null);
     setContentHtml("");
     await loadPastes();
+    requestEditorFocus();
   }
 
   function handleChange(html: string) {
@@ -89,12 +99,10 @@ export default function Pasteboard() {
     }, SAVE_DELAY);
   }
 
-  
-
   return (
     <main className="pasteboard">
       <header className="pasteboard-header">
-        <button className="pasteboard-title" onClick={handleNewPaste}>
+        <button className="pasteboard-title" onMouseDown={(event) => event.preventDefault()} onClick={handleNewPaste}>
           Pasteboard
         </button>
 
@@ -107,7 +115,23 @@ export default function Pasteboard() {
       <div className="pasteboard-body">
         <Sidebar pastes={pastes} activePasteId={activePasteId} onSelectPaste={handleSelectPaste} pasteCount={pastes.length} />
 
-        <section className="editor-column">
+        <section
+          className="editor-column"
+          onPointerDown={(event) => {
+            const target = event.target as HTMLElement;
+
+            const clickedInsideEditor = target.closest(".ProseMirror");
+            const clickedToolbar = target.closest(".toolbar");
+            const clickedDeleteButton = target.closest(".delete-button");
+
+            if (clickedInsideEditor || clickedToolbar || clickedDeleteButton) {
+              return;
+            }
+
+            event.preventDefault();
+            requestEditorFocus();
+          }}
+        >
           <Editor
             contentHtml={contentHtml}
             onChange={handleChange}
