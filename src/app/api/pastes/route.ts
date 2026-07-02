@@ -4,11 +4,21 @@ import { db } from "@/lib/firebaseAdmin";
 const collection = db.collection("pastes");
 
 function createPreview(html: string) {
-  return html
+  const textWithBreaks = html
+    .replace(/<\/(p|h1|h2|h3|li|blockquote)>/gi, "\n")
+    .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<[^>]*>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 80);
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+\n/g, "\n")
+    .replace(/\n\s+/g, "\n")
+    .trim();
+
+  const firstLine = textWithBreaks
+    .split("\n")
+    .map((line) => line.trim())
+    .find(Boolean);
+
+  return (firstLine || "").slice(0, 80);
 }
 
 function isEmptyHtml(html: string) {
