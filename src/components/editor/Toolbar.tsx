@@ -62,11 +62,11 @@ export default function Toolbar({ editor, showLineNumbers, onToggleLineNumbers }
         </span>
       </button>
 
-      <button onClick={() => activeEditor.chain().focus().toggleHighlight().run()}>marcador</button>
-
       <button className={showLineNumbers ? "toolbar-active" : ""} onClick={onToggleLineNumbers}>
         nº
       </button>
+      
+      <button onClick={() => activeEditor.chain().focus().toggleHighlight().run()}>marcador</button>
 
       <button
         className={isHeading ? "toolbar-text-style active" : "toolbar-text-style"}
