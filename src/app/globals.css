@@ -241,6 +241,53 @@ button {
   outline: none;
 }
 
+.toolbar-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  font-size: 16px;
+  line-height: 1;
+  user-select: none;
+}
+
+.toolbar-bold {
+  font-weight: 700;
+}
+
+.toolbar-italic {
+  font-style: italic;
+}
+
+.toolbar-underline {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.toolbar-check-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar-check-icon svg {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+.toolbar-check-icon rect,
+.toolbar-check-icon path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+
 .editor-area:focus {
   outline: none;
 }

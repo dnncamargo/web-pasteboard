@@ -23,14 +23,7 @@ type LineMarker = {
   top: number;
 };
 
-export default function Editor({
-  contentHtml,
-  showLineNumbers,
-  focusToken,
-  onChange,
-  onLineCountChange,
-  onToggleLineNumbers,
-}: EditorProps) {
+export default function Editor({ contentHtml, showLineNumbers, focusToken, onChange, onLineCountChange, onToggleLineNumbers }: EditorProps) {
   const editorWrapRef = useRef<HTMLDivElement | null>(null);
   const [lineMarkers, setLineMarkers] = useState<LineMarker[]>([]);
 
@@ -72,19 +65,43 @@ export default function Editor({
 
     const editorRect = editorElement.getBoundingClientRect();
 
-    const blocks = editorElement.querySelectorAll(
-      "p, h1, h2, h3, blockquote, li"
-    );
-
     const markers: LineMarker[] = [];
+    let lineNumber = 1;
 
-    blocks.forEach((block, index) => {
-      const rect = block.getBoundingClientRect();
+    const topLevelBlocks = Array.from(editorElement.children).filter((node) => {
+      return node instanceof HTMLElement;
+    }) as HTMLElement[];
 
-      markers.push({
-        number: index + 1,
-        top: rect.top - editorRect.top,
-      });
+    topLevelBlocks.forEach((block) => {
+      if (block.matches("ul, ol")) {
+        const listItems = Array.from(block.querySelectorAll(":scope > li"));
+
+        listItems.forEach((item) => {
+          if (!(item instanceof HTMLElement)) return;
+
+          const rect = item.getBoundingClientRect();
+
+          markers.push({
+            number: lineNumber,
+            top: rect.top - editorRect.top,
+          });
+
+          lineNumber += 1;
+        });
+
+        return;
+      }
+
+      if (block.matches("p, h1, h2, h3, blockquote")) {
+        const rect = block.getBoundingClientRect();
+
+        markers.push({
+          number: lineNumber,
+          top: rect.top - editorRect.top,
+        });
+
+        lineNumber += 1;
+      }
     });
 
     if (markers.length === 0) {
@@ -134,20 +151,9 @@ export default function Editor({
 
   return (
     <div className="editor-shell">
-      <Toolbar
-        editor={editor}
-        showLineNumbers={showLineNumbers}
-        onToggleLineNumbers={onToggleLineNumbers}
-      />
+      <Toolbar editor={editor} showLineNumbers={showLineNumbers} onToggleLineNumbers={onToggleLineNumbers} />
 
-      <div
-        ref={editorWrapRef}
-        className={
-          showLineNumbers
-            ? "editor-wrap line-numbers-visible"
-            : "editor-wrap"
-        }
-      >
+      <div ref={editorWrapRef} className={showLineNumbers ? "editor-wrap line-numbers-visible" : "editor-wrap"}>
         {showLineNumbers && (
           <div className="line-numbers" aria-hidden="true">
             <div className="line-numbers-inner">
