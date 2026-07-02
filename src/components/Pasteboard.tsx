@@ -15,8 +15,13 @@ export default function Pasteboard() {
   const [lineCount, setLineCount] = useState(1);
   const [showLineNumbers, setShowLineNumbers] = useState(false);
   const [focusToken, setFocusToken] = useState(0);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const saveTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  function requestEditorFocus() {
+    setFocusToken((value) => value + 1);
+  }
 
   async function loadPastes() {
     const response = await fetch("/api/pastes");
@@ -28,17 +33,14 @@ export default function Pasteboard() {
     loadPastes();
   }, []);
 
-  function requestEditorFocus() {
-    setFocusToken((value) => value + 1);
-  }
-
   function handleNewPaste() {
     setActivePasteId(null);
     setContentHtml("");
     setStatus("idle");
+    setMobileSidebarOpen(false);
 
     requestAnimationFrame(() => {
-      setFocusToken((value) => value + 1);
+      requestEditorFocus();
     });
   }
 
@@ -46,10 +48,13 @@ export default function Pasteboard() {
     setActivePasteId(paste.id);
     setContentHtml(paste.contentHtml);
     setStatus("idle");
+    setMobileSidebarOpen(false);
     requestEditorFocus();
   }
 
   async function handleDelete() {
+    setMobileSidebarOpen(false);
+
     if (!activePasteId) {
       setContentHtml("");
       requestEditorFocus();
@@ -67,6 +72,7 @@ export default function Pasteboard() {
   }
 
   function handleChange(html: string) {
+    setMobileSidebarOpen(false);
     setContentHtml(html);
     setStatus("saving");
 
@@ -99,10 +105,22 @@ export default function Pasteboard() {
     }, SAVE_DELAY);
   }
 
+  function handleToggleMobileSidebar() {
+    setMobileSidebarOpen((value) => !value);
+
+    if (mobileSidebarOpen) {
+      requestEditorFocus();
+    }
+  }
+
   return (
     <main className="pasteboard">
       <header className="pasteboard-header">
-        <button className="pasteboard-title" onMouseDown={(event) => event.preventDefault()} onClick={handleNewPaste}>
+        <button
+          className="pasteboard-title"
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={handleNewPaste}
+        >
           Pasteboard
         </button>
 
@@ -113,7 +131,13 @@ export default function Pasteboard() {
       </header>
 
       <div className="pasteboard-body">
-        <Sidebar pastes={pastes} activePasteId={activePasteId} onSelectPaste={handleSelectPaste} pasteCount={pastes.length} />
+        <Sidebar
+          pastes={pastes}
+          activePasteId={activePasteId}
+          onSelectPaste={handleSelectPaste}
+          pasteCount={pastes.length}
+          mobileOpen={mobileSidebarOpen}
+        />
 
         <section
           className="editor-column"
@@ -123,12 +147,19 @@ export default function Pasteboard() {
             const clickedInsideEditor = target.closest(".ProseMirror");
             const clickedToolbar = target.closest(".toolbar");
             const clickedDeleteButton = target.closest(".delete-button");
+            const clickedMobileFooter = target.closest(".mobile-footer");
 
-            if (clickedInsideEditor || clickedToolbar || clickedDeleteButton) {
+            if (
+              clickedInsideEditor ||
+              clickedToolbar ||
+              clickedDeleteButton ||
+              clickedMobileFooter
+            ) {
               return;
             }
 
             event.preventDefault();
+            setMobileSidebarOpen(false);
             requestEditorFocus();
           }}
         >
@@ -141,7 +172,7 @@ export default function Pasteboard() {
             focusToken={focusToken}
           />
 
-          <footer className="editor-footer">
+          <footer className="editor-footer desktop-footer">
             <span className="line-count">{lineCount} linhas</span>
 
             <button className="delete-button" onClick={handleDelete}>
@@ -150,6 +181,21 @@ export default function Pasteboard() {
           </footer>
         </section>
       </div>
+
+      <footer className="mobile-footer">
+        <button
+          className="mobile-footer-button"
+          onClick={handleToggleMobileSidebar}
+        >
+          {pastes.length} {pastes.length === 1 ? "paste" : "pastes"}
+        </button>
+
+        <span>{lineCount} linhas</span>
+
+        <button className="delete-button" onClick={handleDelete}>
+          excluir
+        </button>
+      </footer>
     </main>
   );
 }

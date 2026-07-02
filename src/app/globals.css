@@ -283,3 +283,151 @@ button {
 .delete-button {
   cursor: pointer;
 }
+
+
+.mobile-footer {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .pasteboard {
+    height: 100dvh;
+    grid-template-rows: 58px 1fr 44px;
+    overflow: hidden;
+  }
+
+  .pasteboard-header {
+    padding: 0 18px;
+  }
+
+  .pasteboard-title {
+    font-size: 28px;
+    letter-spacing: 0.08em;
+  }
+
+  .save-status {
+    font-size: 12px;
+  }
+
+  .pasteboard-body {
+    display: block;
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .editor-column {
+    height: 100%;
+    padding: 0 18px;
+  }
+
+  .editor-shell {
+    height: 100%;
+  }
+
+  .toolbar {
+    min-height: 36px;
+    gap: 9px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    padding-bottom: 2px;
+  }
+
+  .toolbar button {
+    flex: 0 0 auto;
+  }
+
+  .editor-wrap {
+    height: calc(100dvh - 58px - 44px - 38px);
+  }
+
+  .editor-content-wrap {
+    padding-left: 0;
+  }
+
+  .line-numbers-visible .editor-content-wrap {
+    padding-left: 38px;
+  }
+
+  .line-numbers {
+    width: 30px;
+    font-size: 12px;
+  }
+
+  .line-numbers span {
+    right: 6px;
+  }
+
+  .editor-area {
+    min-height: 100%;
+    font-size: 17px;
+    line-height: 1.42;
+    padding: 10px 0 18px;
+  }
+
+  .editor-area h2 {
+    font-size: 23px;
+  }
+
+  .desktop-footer,
+  .sidebar-footer {
+    display: none;
+  }
+
+  .mobile-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 18px;
+    color: var(--muted);
+    font-size: 13px;
+    background: var(--bg);
+  }
+
+  .mobile-footer span {
+    text-align: center;
+  }
+
+  .mobile-footer-button {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    text-align: left;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .mobile-footer .delete-button {
+    text-align: right;
+  }
+
+  .sidebar {
+    position: absolute;
+    z-index: 20;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: min(48dvh, 360px);
+    padding: 12px 18px;
+    background: var(--bg);
+    transform: translateY(105%);
+    transition: transform 180ms ease;
+    box-shadow: 0 -12px 28px rgba(31, 29, 26, 0.08);
+  }
+
+  .sidebar.mobile-open {
+    transform: translateY(0);
+  }
+
+  .sidebar-list {
+    overflow-y: auto;
+  }
+
+  .paste-preview {
+    font-size: 14px;
+    padding: 11px 0;
+  }
+}

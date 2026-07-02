@@ -4,6 +4,7 @@ type SidebarProps = {
   pastes: Paste[];
   activePasteId: string | null;
   pasteCount: number;
+  mobileOpen?: boolean;
   onSelectPaste: (paste: Paste) => void;
 };
 
@@ -11,10 +12,11 @@ export default function Sidebar({
   pastes,
   activePasteId,
   pasteCount,
+  mobileOpen = false,
   onSelectPaste,
 }: SidebarProps) {
   return (
-    <aside className="sidebar">
+    <aside className={mobileOpen ? "sidebar mobile-open" : "sidebar"}>
       <div className="sidebar-list">
         {pastes.map((paste) => (
           <button
