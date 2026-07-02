@@ -284,7 +284,6 @@ button {
   cursor: pointer;
 }
 
-
 .mobile-footer {
   display: none;
 }
@@ -373,6 +372,26 @@ button {
   .desktop-footer,
   .sidebar-footer {
     display: none;
+  }
+
+  .delete-button {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition:
+      color 160ms ease,
+      letter-spacing 160ms ease;
+  }
+
+  .delete-button:hover {
+    color: var(--text);
+  }
+
+  .delete-button.armed {
+    color: var(--text);
+    letter-spacing: 0.08em;
+    text-decoration: underline;
   }
 
   .mobile-footer {

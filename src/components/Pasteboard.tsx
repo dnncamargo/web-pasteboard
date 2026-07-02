@@ -16,8 +16,10 @@ export default function Pasteboard() {
   const [showLineNumbers, setShowLineNumbers] = useState(false);
   const [focusToken, setFocusToken] = useState(0);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [deleteArmed, setDeleteArmed] = useState(false);
 
   const saveTimeout = useRef<NodeJS.Timeout | null>(null);
+  const deleteTimeout = useRef<NodeJS.Timeout | null>(null);
 
   function requestEditorFocus() {
     setFocusToken((value) => value + 1);
@@ -34,6 +36,7 @@ export default function Pasteboard() {
   }, []);
 
   function handleNewPaste() {
+    resetDeleteConfirmation();
     setActivePasteId(null);
     setContentHtml("");
     setStatus("idle");
@@ -48,12 +51,30 @@ export default function Pasteboard() {
     setActivePasteId(paste.id);
     setContentHtml(paste.contentHtml);
     setStatus("idle");
+    resetDeleteConfirmation();
     setMobileSidebarOpen(false);
     requestEditorFocus();
   }
 
   async function handleDelete() {
     setMobileSidebarOpen(false);
+
+    if (!deleteArmed) {
+      setDeleteArmed(true);
+
+      if (deleteTimeout.current) {
+        clearTimeout(deleteTimeout.current);
+      }
+
+      deleteTimeout.current = setTimeout(() => {
+        setDeleteArmed(false);
+        deleteTimeout.current = null;
+      }, 3000);
+
+      return;
+    }
+
+    resetDeleteConfirmation();
 
     if (!activePasteId) {
       setContentHtml("");
@@ -72,6 +93,7 @@ export default function Pasteboard() {
   }
 
   function handleChange(html: string) {
+    resetDeleteConfirmation();
     setMobileSidebarOpen(false);
     setContentHtml(html);
     setStatus("saving");
@@ -107,20 +129,26 @@ export default function Pasteboard() {
 
   function handleToggleMobileSidebar() {
     setMobileSidebarOpen((value) => !value);
+    resetDeleteConfirmation();
 
     if (mobileSidebarOpen) {
       requestEditorFocus();
     }
   }
 
+  function resetDeleteConfirmation() {
+    setDeleteArmed(false);
+
+    if (deleteTimeout.current) {
+      clearTimeout(deleteTimeout.current);
+      deleteTimeout.current = null;
+    }
+  }
+
   return (
     <main className="pasteboard">
       <header className="pasteboard-header">
-        <button
-          className="pasteboard-title"
-          onMouseDown={(event) => event.preventDefault()}
-          onClick={handleNewPaste}
-        >
+        <button className="pasteboard-title" onMouseDown={(event) => event.preventDefault()} onClick={handleNewPaste}>
           Pasteboard
         </button>
 
@@ -131,13 +159,7 @@ export default function Pasteboard() {
       </header>
 
       <div className="pasteboard-body">
-        <Sidebar
-          pastes={pastes}
-          activePasteId={activePasteId}
-          onSelectPaste={handleSelectPaste}
-          pasteCount={pastes.length}
-          mobileOpen={mobileSidebarOpen}
-        />
+        <Sidebar pastes={pastes} activePasteId={activePasteId} onSelectPaste={handleSelectPaste} pasteCount={pastes.length} mobileOpen={mobileSidebarOpen} />
 
         <section
           className="editor-column"
@@ -149,12 +171,7 @@ export default function Pasteboard() {
             const clickedDeleteButton = target.closest(".delete-button");
             const clickedMobileFooter = target.closest(".mobile-footer");
 
-            if (
-              clickedInsideEditor ||
-              clickedToolbar ||
-              clickedDeleteButton ||
-              clickedMobileFooter
-            ) {
+            if (clickedInsideEditor || clickedToolbar || clickedDeleteButton || clickedMobileFooter) {
               return;
             }
 
@@ -175,18 +192,15 @@ export default function Pasteboard() {
           <footer className="editor-footer desktop-footer">
             <span className="line-count">{lineCount} linhas</span>
 
-            <button className="delete-button" onClick={handleDelete}>
-              excluir
+            <button className={deleteArmed ? "delete-button armed" : "delete-button"} onClick={handleDelete}>
+              {deleteArmed ? "confirmar" : "excluir"}
             </button>
           </footer>
         </section>
       </div>
 
       <footer className="mobile-footer">
-        <button
-          className="mobile-footer-button"
-          onClick={handleToggleMobileSidebar}
-        >
+        <button className="mobile-footer-button" onClick={handleToggleMobileSidebar}>
           {pastes.length} {pastes.length === 1 ? "paste" : "pastes"}
         </button>
 
