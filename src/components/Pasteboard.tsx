@@ -193,7 +193,7 @@ export default function Pasteboard() {
             <span className="line-count">{lineCount} linhas</span>
 
             <button className={deleteArmed ? "delete-button armed" : "delete-button"} onClick={handleDelete}>
-              {deleteArmed ? "confirmar" : "excluir"}
+              {deleteArmed ? "confirmar?" : "excluir"}
             </button>
           </footer>
         </section>
@@ -206,9 +206,9 @@ export default function Pasteboard() {
 
         <span>{lineCount} linhas</span>
 
-        <button className="delete-button" onClick={handleDelete}>
-          excluir
-        </button>
+            <button className={deleteArmed ? "delete-button armed" : "delete-button"} onClick={handleDelete}>
+              {deleteArmed ? "confirmar?" : "excluir"}
+            </button>
       </footer>
     </main>
   );
