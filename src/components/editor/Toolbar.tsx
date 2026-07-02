@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { Editor } from "@tiptap/react";
 
 type ToolbarProps = {
@@ -7,63 +8,52 @@ type ToolbarProps = {
 };
 
 export default function Toolbar({ editor, showLineNumbers, onToggleLineNumbers }: ToolbarProps) {
+  const [isHeading, setIsHeading] = useState(false);
+
+  useEffect(() => {
+    if (!editor) {
+      setIsHeading(false);
+      return;
+    }
+
+    const activeEditor = editor;
+
+    function updateCurrentTextStyle() {
+      setIsHeading(activeEditor.isActive("heading", { level: 2 }));
+    }
+
+    updateCurrentTextStyle();
+
+    activeEditor.on("selectionUpdate", updateCurrentTextStyle);
+    activeEditor.on("transaction", updateCurrentTextStyle);
+
+    return () => {
+      activeEditor.off("selectionUpdate", updateCurrentTextStyle);
+      activeEditor.off("transaction", updateCurrentTextStyle);
+    };
+  }, [editor]);
+
   if (!editor) return null;
+
+  const activeEditor = editor;
 
   return (
     <nav className="toolbar">
-      <button 
-        aria-label="Negrito" 
-        title="Negrito" 
-        onClick={() => editor.chain().focus().toggleBold().run()}>
-        𝐁
-      </button>
+      <button onClick={() => activeEditor.chain().focus().toggleBold().run()}>𝐁</button>
 
-      <button 
-        aria-label="Itálico" 
-        title="Itálico" 
-        onClick={() => editor.chain().focus().toggleItalic().run()}>
-        𝑰
-      </button>
+      <button onClick={() => activeEditor.chain().focus().toggleItalic().run()}>𝐼</button>
 
-      <button 
-        aria-label="Sublinhado" 
-        title="Sublinhado" 
-        onClick={() => editor.chain().focus().toggleUnderline().run()}>
-        u̲
-      </button>
+      <button onClick={() => activeEditor.chain().focus().toggleUnderline().run()}>u̲</button>
 
-      <button 
-        aria-label="Tópicos" 
-        title="Tópicos" 
-        onClick={() => editor.chain().focus().toggleBulletList().run()}>
-        •
-      </button>
+      <button onClick={() => activeEditor.chain().focus().toggleBulletList().run()}>•</button>
 
-      <button 
-        aria-label="Lista numerada" 
-        title="Lista numerada" 
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}>
-        1.
-      </button>
+      <button onClick={() => activeEditor.chain().focus().toggleOrderedList().run()}>1.</button>
 
-      <button 
-        aria-label="Recuar item da lista"
-        title="Recuar item da lista"
-        onClick={() => editor.chain().focus().sinkListItem("listItem").run()}>
-        →
-      </button>
+      <button onClick={() => activeEditor.chain().focus().sinkListItem("listItem").run()}>→</button>
 
-      <button 
-        aria-label="Avançar item da lista"
-        title="Avançar item da lista"
-        onClick={() => editor.chain().focus().liftListItem("listItem").run()}>
-        ←
-      </button>
+      <button onClick={() => activeEditor.chain().focus().liftListItem("listItem").run()}>←</button>
 
-      <button 
-        aria-label="Lista de tarefas" 
-        title="Lista de tarefas" 
-        onClick={() => editor.chain().focus().toggleTaskList().run()}>
+      <button aria-label="Lista de tarefas" title="Lista de tarefas" onClick={() => editor.chain().focus().toggleTaskList().run()}>
         <span className="toolbar-check-icon" aria-hidden="true">
           <svg viewBox="0 0 16 16">
             <rect x="2.5" y="2.5" width="11" height="11" />
@@ -72,32 +62,27 @@ export default function Toolbar({ editor, showLineNumbers, onToggleLineNumbers }
         </span>
       </button>
 
-      <button 
-        aria-label="Números de linha"
-        title="Números de linha"
-        className={showLineNumbers ? "toolbar-active" : ""} onClick={onToggleLineNumbers}>
+      <button onClick={() => activeEditor.chain().focus().toggleHighlight().run()}>marcador</button>
+
+      <button className={showLineNumbers ? "toolbar-active" : ""} onClick={onToggleLineNumbers}>
         nº
       </button>
 
-      <button 
-        aria-label="Marcador"
-        title="Marcador"
-        onClick={() => editor.chain().focus().toggleHighlight().run()}>
-        marcador
-      </button>
+      <button
+        className={isHeading ? "toolbar-text-style active" : "toolbar-text-style"}
+        title={isHeading ? "Transformar em corpo de texto" : "Transformar em título"}
+        onClick={() => {
+          if (isHeading) {
+            activeEditor.chain().focus().setParagraph().run();
+            setIsHeading(false);
+            return;
+          }
 
-      <button 
-        aria-label="Texto"
-        title="Texto"
-        onClick={() => editor.chain().focus().setParagraph().run()}>
-        texto
-      </button>
-
-      <button 
-        aria-label="Título"
-        title="Título"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>
-        título
+          activeEditor.chain().focus().toggleHeading({ level: 2 }).run();
+          setIsHeading(true);
+        }}
+      >
+        {isHeading ? "título" : "corpo de texto"}
       </button>
     </nav>
   );

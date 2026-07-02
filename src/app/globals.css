@@ -66,6 +66,7 @@ button {
   display: grid;
   grid-template-columns: 180px 1fr;
   min-height: 0;
+  letter-spacing: -0.5;
 }
 
 .sidebar {
@@ -140,6 +141,7 @@ button {
   color: var(--muted);
   cursor: pointer;
   padding: 4px 2px;
+  letter-spacing: -0.5;
 }
 
 .toolbar button:hover {
@@ -241,28 +243,31 @@ button {
   outline: none;
 }
 
-.toolbar-glyph {
+.toolbar-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.toolbar-icon path,
+.toolbar-icon line,
+.toolbar-icon rect,
+.toolbar-icon circle,
+.toolbar-icon polyline {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  vector-effect: non-scaling-stroke;
+}
+
+.toolbar button {
+  min-width: 24px;
+  min-height: 24px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
-  font-size: 16px;
-  line-height: 1;
-  user-select: none;
-}
-
-.toolbar-bold {
-  font-weight: 700;
-}
-
-.toolbar-italic {
-  font-style: italic;
-}
-
-.toolbar-underline {
-  text-decoration: underline;
-  text-underline-offset: 2px;
 }
 
 .toolbar-check-icon {
@@ -480,8 +485,8 @@ button {
   }
 
   .delete-button.armed {
-    color: var(--text);
-    letter-spacing: 0.08em;
+    color: #9b2c2c;
+    letter-spacing: 0.04em;
     text-decoration: underline;
   }
 
