@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { Paste } from "@/types/paste";
 import Editor from "./editor/Editor";
 import Sidebar from "./Sidebar";
@@ -51,6 +51,19 @@ export default function Pasteboard() {
     setPinError(null);
     setProtectStage("none");
     setFirstPin("");
+  }
+
+  function cancelProtectSetup() {
+    setPinInput("");
+    setPinError(null);
+    setFirstPin("");
+    setProtectStage("none");
+  }
+
+  function handleProtectKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Escape") {
+      cancelProtectSetup();
+    }
   }
 
   async function loadPastes() {
@@ -409,9 +422,13 @@ export default function Pasteboard() {
                 autoFocus
                 value={pinInput}
                 onChange={(event) => handlePinChange(event.target.value)}
+                onKeyDown={handleProtectKeyDown}
                 placeholder="PIN"
                 aria-label="PIN"
               />
+              <button type="button" className="cancel-button" onClick={cancelProtectSetup}>
+                cancelar
+              </button>
               {pinError && <span className="pin-error">{pinError}</span>}
             </form>
           )}
@@ -428,9 +445,13 @@ export default function Pasteboard() {
                 autoFocus
                 value={pinInput}
                 onChange={(event) => handlePinChange(event.target.value)}
+                onKeyDown={handleProtectKeyDown}
                 placeholder="PIN"
                 aria-label="PIN"
               />
+              <button type="button" className="cancel-button" onClick={cancelProtectSetup}>
+                cancelar
+              </button>
               {pinError && <span className="pin-error">{pinError}</span>}
             </form>
           )}
