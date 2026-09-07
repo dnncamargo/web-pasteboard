@@ -28,10 +28,29 @@ function isEmptyHtml(html: string) {
 export async function GET() {
   const snapshot = await collection.orderBy("updatedAt", "desc").get();
 
-  const pastes = snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
+  const pastes = snapshot.docs.map((doc) => {
+    const data = doc.data();
+    const isProtected = Boolean(data.protection);
+
+    if (isProtected) {
+      return {
+        id: doc.id,
+        preview: data.preview,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+        protected: true,
+      };
+    }
+
+    return {
+      id: doc.id,
+      contentHtml: data.contentHtml,
+      preview: data.preview,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+      protected: false,
+    };
+  });
 
   return NextResponse.json(pastes);
 }
