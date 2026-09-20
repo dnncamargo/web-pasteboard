@@ -390,6 +390,9 @@ export default function Pasteboard() {
                 placeholder="PIN"
                 aria-label="PIN"
               />
+              <button type="submit" className="pin-submit" disabled={pinInput.length !== PIN_MAX_LENGTH}>
+                confirmar
+              </button>
               {pinError && <span className="pin-error">{pinError}</span>}
             </form>
           )}
@@ -426,6 +429,9 @@ export default function Pasteboard() {
                 placeholder="PIN"
                 aria-label="PIN"
               />
+              <button type="submit" className="pin-submit" disabled={pinInput.length !== PIN_MAX_LENGTH}>
+                continuar
+              </button>
               <button type="button" className="cancel-button" onClick={cancelProtectSetup}>
                 cancelar
               </button>
@@ -449,6 +455,9 @@ export default function Pasteboard() {
                 placeholder="PIN"
                 aria-label="PIN"
               />
+              <button type="submit" className="pin-submit" disabled={pinInput.length !== PIN_MAX_LENGTH}>
+                confirmar
+              </button>
               <button type="button" className="cancel-button" onClick={cancelProtectSetup}>
                 cancelar
               </button>

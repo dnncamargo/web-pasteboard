@@ -95,6 +95,25 @@ button {
   color: var(--text);
 }
 
+.pin-submit {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 6px 4px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.pin-submit:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.pin-submit:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
 .protected-label {
   color: var(--muted);
   font-size: 13px;
@@ -499,7 +518,9 @@ button {
   }
 
   .pin-form {
-    gap: 6px;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    min-width: 0;
   }
 
   .pin-input {
@@ -508,8 +529,16 @@ button {
     letter-spacing: 0.16em;
   }
 
+  .pin-submit,
+  .cancel-button {
+    padding: 8px 2px;
+    font-size: 12px;
+  }
+
   .pin-error {
+    flex-basis: 100%;
     font-size: 11px;
+    text-align: right;
   }
 
   .pasteboard-body {
