@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:hard-break-paste": "node --experimental-strip-types scripts/test-hard-break-paste.mjs"
   },
   "dependencies": {
     "@tiptap/extension-highlight": "^3.27.1",

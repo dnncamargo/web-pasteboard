@@ -8,6 +8,7 @@ import Highlight from "@tiptap/extension-highlight";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import Toolbar from "./Toolbar";
+import { normalizeHardBreakPaste } from "./hardBreakPaste";
 
 type EditorProps = {
   contentHtml: string;
@@ -42,6 +43,15 @@ export default function Editor({ contentHtml, showLineNumbers, focusToken, onCha
     editorProps: {
       attributes: {
         class: "editor-area",
+      },
+      handlePaste(view, event, slice) {
+        const html = event.clipboardData?.getData("text/html") || null;
+        const normalizedSlice = normalizeHardBreakPaste(view.state, slice, html);
+
+        if (!normalizedSlice) return false;
+
+        view.dispatch(view.state.tr.replaceSelection(normalizedSlice).scrollIntoView());
+        return true;
       },
     },
     onCreate({ editor }) {
