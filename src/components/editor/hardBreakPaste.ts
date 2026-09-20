@@ -23,7 +23,7 @@ function isHardBreakOnlyParagraph(state: EditorState) {
   return true;
 }
 
-function isInlineBoundarySlice(slice: Slice, html: string | null) {
+function isMalformedInlineBoundarySlice(slice: Slice, html: string | null) {
   const dataPmSlice = readDataPmSlice(html);
 
   if (!dataPmSlice || !/^1\s+1(?:\s|$)/.test(dataPmSlice)) return false;
@@ -48,11 +48,55 @@ function isInlineBoundarySlice(slice: Slice, html: string | null) {
   const leadingCount = paragraphIndex;
   const trailingCount = slice.content.childCount - paragraphIndex - 1;
 
-  return leadingCount >= 1 && trailingCount >= 2;
+  return leadingCount >= 1 && trailingCount >= 1;
+}
+
+function isSameParagraphSelection(state: EditorState) {
+  const { $from, $to } = state.selection;
+
+  return Boolean(
+    state.selection instanceof TextSelection &&
+      $from.parent === $to.parent &&
+      $from.parent.type.name === "paragraph",
+  );
+}
+
+function isCompleteTaskList(node: Slice["content"]["firstChild"]) {
+  if (!node || node.type.name !== "taskList" || node.childCount === 0) return false;
+
+  return Array.from({ length: node.childCount }, (_, index) => node.child(index)).every((taskItem) => {
+    return taskItem.type.name === "taskItem" && taskItem.childCount > 0;
+  });
+}
+
+function isOpenTaskListBoundarySlice(slice: Slice, html: string | null) {
+  const dataPmSlice = readDataPmSlice(html);
+  const taskList = slice.content.firstChild;
+  const trailingNode = slice.content.childCount === 2 ? slice.content.lastChild : null;
+
+  return Boolean(
+    dataPmSlice &&
+      /^3\s+1(?:\s|$)/.test(dataPmSlice) &&
+      slice.openStart === 3 &&
+      slice.openEnd === 1 &&
+      slice.content.childCount === 2 &&
+      isCompleteTaskList(taskList) &&
+      trailingNode?.type.name === "paragraph" &&
+      trailingNode.childCount === 0,
+  );
+}
+
+function normalizeTaskListPaste(state: EditorState, slice: Slice, html: string | null) {
+  if (!isHardBreakOnlyParagraph(state) || !isOpenTaskListBoundarySlice(slice, html)) return null;
+
+  return new Slice(Fragment.from(slice.content.firstChild), 0, 0);
 }
 
 export function normalizeHardBreakPaste(state: EditorState, slice: Slice, html: string | null) {
-  if (!isHardBreakOnlyParagraph(state) || !isInlineBoundarySlice(slice, html)) return null;
+  const taskListSlice = normalizeTaskListPaste(state, slice, html);
+
+  if (taskListSlice) return taskListSlice;
+  if (!isSameParagraphSelection(state) || !isMalformedInlineBoundarySlice(slice, html)) return null;
 
   const paragraph = slice.content.child(
     Array.from({ length: slice.content.childCount }, (_, index) => index).find(
@@ -60,5 +104,5 @@ export function normalizeHardBreakPaste(state: EditorState, slice: Slice, html: 
     ) ?? 0,
   );
 
-  return new Slice(Fragment.from(paragraph), 1, 1);
+  return new Slice(paragraph.content, 0, 0);
 }
